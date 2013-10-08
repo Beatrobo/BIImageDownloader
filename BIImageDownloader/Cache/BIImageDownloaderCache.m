@@ -11,7 +11,7 @@
 
 @implementation BIImageDownloaderCache
 
-+ (BIImageDownloaderCache *)cacheWithData:(NSData*)data key:(NSString*)key
++ (instancetype)cacheWithData:(NSData*)data key:(NSString*)key
 {
     if (!data) {
         return nil;
@@ -28,7 +28,7 @@
     return cache;
 }
 
-+ (BIImageDownloaderCache*)cacheFromStorageWithKey:(NSString *)key usingFileManager:(NSFileManager*)fm;
++ (instancetype)cacheFromStorageWithKey:(NSString *)key usingFileManager:(NSFileManager*)fm;
 {
     NSData* data = [NSData dataWithContentsOfFile:[[self cacheDirectoryPath] stringByAppendingPathComponent:key]];
     BIImageDownloaderCache* cache = [self cacheWithData:data key:key];

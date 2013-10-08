@@ -32,7 +32,7 @@
 
 @implementation BIImageDownloader
 
-+ (BIImageDownloader*)sharedInstance
++ (instancetype)sharedInstance
 {
     static id downloader;
     static dispatch_once_t onceToken;

@@ -18,8 +18,8 @@
 #endif
 }
 
-+ (BIImageDownloaderCache*)cacheWithData:(NSData*)data key:(NSString*)key; // returns nil if data is nil
-+ (BIImageDownloaderCache*)cacheFromStorageWithKey:(NSString*)key usingFileManager:(NSFileManager*)fm; // returns nil if no data on storage
++ (instancetype)cacheWithData:(NSData*)data key:(NSString*)key; // returns nil if data is nil
++ (instancetype)cacheFromStorageWithKey:(NSString*)key usingFileManager:(NSFileManager*)fm; // returns nil if no data on storage
 
 @property (nonatomic, copy)     NSString*      key;
 @property (nonatomic)           NSTimeInterval createdAt;
