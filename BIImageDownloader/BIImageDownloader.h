@@ -9,7 +9,15 @@
 
 #import <Foundation/Foundation.h>
 
-typedef void(^BIImageDownloaderCompleteBlock)(id image); // nil is failed. UIImage or NSImage
+
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+    #define BIImageType UIImage
+#elif TARGET_OS_MAC
+    #define BIImageType NSImage
+#endif
+
+
+typedef void(^BIImageDownloaderCompleteBlock)(BIImageType* image); // nil is failed. UIImage or NSImage
 
 @interface BIImageDownloader : NSObject
 
@@ -17,6 +25,6 @@ typedef void(^BIImageDownloaderCompleteBlock)(id image); // nil is failed. UIIma
 
 + (instancetype)sharedInstance;
 
-- (void)getImageWithURL:(NSString*)url useOnMemoryCache:(BOOL)useOnMemoryCache lifeTime:(NSUInteger)expireTime completion:(BIImageDownloaderCompleteBlock)completion;
+- (BIImageType*)getImageWithURL:(NSString*)url useOnMemoryCache:(BOOL)useOnMemoryCache lifeTime:(NSUInteger)expireTime completion:(BIImageDownloaderCompleteBlock)completion;
 
 @end

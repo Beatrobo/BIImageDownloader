@@ -70,11 +70,11 @@
     return _queue;
 }
 
-- (void)getImageWithURL:(NSString*)url useOnMemoryCache:(BOOL)useOnMemoryCache lifeTime:(NSUInteger)expireTime completion:(BIImageDownloaderCompleteBlock)completion
+- (BIImageType*)getImageWithURL:(NSString*)url useOnMemoryCache:(BOOL)useOnMemoryCache lifeTime:(NSUInteger)expireTime completion:(BIImageDownloaderCompleteBlock)completion
 {
     if (!url) {
         completion(nil);
-        return;
+        return nil;
     }
     NSString* key = [self keyWithURL:url];
 
@@ -83,7 +83,7 @@
     if (cache.image) {
         BIImageDownloaderDebugLog(@"%@ is on memory, %d", url, _memoryCache.count);
         completion(cache.image);
-        return;
+        return cache.image;
     }
 
     dispatch_async(_storageQueue, ^{
@@ -140,6 +140,7 @@
                                       });
                                   }];
     });
+    return nil;
 }
 
 - (NSString*)keyWithURL:(NSString*)url

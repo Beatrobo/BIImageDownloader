@@ -7,15 +7,11 @@
 //  Copyright (c) 2013年 Beatrobo Inc. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import "BIImageDownloader.h"
 
 @interface BIImageDownloaderCache : NSObject
 {
-#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-    UIImage* _image;
-#elif TARGET_OS_MAC
-    NSImage* _image;
-#endif
+    BIImageType* _image;
 }
 
 + (instancetype)cacheWithData:(NSData*)data key:(NSString*)key; // returns nil if data is nil
@@ -25,11 +21,7 @@
 @property (nonatomic)           NSTimeInterval createdAt;
 @property (nonatomic, copy)     NSData*        data;
 
-#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-@property (nonatomic, readonly) UIImage* image;
-#elif TARGET_OS_MAC
-@property (nonatomic, readonly) NSImage* image;
-#endif
+@property (nonatomic, readonly) BIImageType* image;
 
 - (void)save;
 - (void)deleteUsingFileManager:(NSFileManager*)fm;
