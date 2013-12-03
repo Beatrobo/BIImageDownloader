@@ -16,8 +16,13 @@
 #import "BIReachability.h"
 #import "NSURLConnection+bi_sendAsynchronousRequestOnMainThread.h"
 
-//#define BIImageDownloaderDebugLog(format, ...)   DPDLog(format, ##__VA_ARGS__)
-#define BIImageDownloaderDebugLog(format, ...)   {;}
+#import "DPMacros.h"
+
+#ifdef DEBUG
+    #define BIImageDownloaderDebugLog(format, ...)   DPDLog(format, ##__VA_ARGS__)
+#else
+    #define BIImageDownloaderDebugLog(format, ...)   {;}
+#endif
 
 
 @interface BIImageDownloader ()
