@@ -37,16 +37,7 @@
         return _image;
     }
 
-    #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-    {
-        return [UIImage imageWithData:_data];
-    }
-    #elif TARGET_OS_MAC
-    {
-        #warning あとで NSImage のこと調べる
-        return nil;
-    }
-    #endif
+    return [[BIImageType alloc] initWithData:_data];
 }
 
 - (BOOL)isExpiredWith:(NSTimeInterval)time lifeTime:(NSTimeInterval)lifeTime
