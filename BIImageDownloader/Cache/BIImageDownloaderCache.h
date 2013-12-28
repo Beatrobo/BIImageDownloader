@@ -1,13 +1,5 @@
-//
-//  BIImageDownloaderCache.h
-//  BIImageDownloader
-//
-//  Created by Yusuke Sugamiya on 2013/07/19.
-//  Original by ito on 2012/09/03.
-//  Copyright (c) 2013年 Beatrobo Inc. All rights reserved.
-//
+#import "BIImageType.h"
 
-#import "BIImageDownloader.h"
 
 @interface BIImageDownloaderCache : NSObject
 {

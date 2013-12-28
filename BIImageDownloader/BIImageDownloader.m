@@ -1,22 +1,11 @@
-//
-//  BIImageDownloader.m
-//  BIImageDownloader
-//
-//  Created by Yusuke Sugamiya on 2013/07/19.
-//  Original by ito on 2012/09/03.
-//  Copyright (c) 2013年 Beatrobo Inc. All rights reserved.
-//
-
 #import "BIImageDownloader.h"
-
 #import "BIImageDownloaderCache.h"
-
 #import <CommonCrypto/CommonDigest.h>
 #include <time.h>
 #import "BIReachability.h"
 #import "NSURLConnection+bi_sendAsynchronousRequestOnMainThread.h"
-
 #import "DPMacros.h"
+
 
 #ifdef DEBUG
     #define BIImageDownloaderDebugLog(format, ...)   DPDLog(format, ##__VA_ARGS__)
@@ -34,6 +23,7 @@
     NSMutableDictionary* _memoryCache;
 }
 @end
+
 
 @implementation BIImageDownloader
 
@@ -86,7 +76,7 @@
     // find cahce on memory
     BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:YES expiresTime:expireTime];
     if (cache.image) {
-        BIImageDownloaderDebugLog(@"%@ is on memory, %d", url, _memoryCache.count);
+        BIImageDownloaderDebugLog(@"%@ is on memory, %d", url, (int)_memoryCache.count);
         completion(cache.image);
         return cache.image;
     }
@@ -152,7 +142,7 @@
 {
     const char *cStr = [url UTF8String];
     unsigned char result[16];
-    CC_MD5( cStr, strlen(cStr), result );
+    CC_MD5( cStr, (CC_LONG)strlen(cStr), result );
     return [NSString stringWithFormat:
             @"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
             result[0], result[1], result[2], result[3],

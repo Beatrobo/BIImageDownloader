@@ -1,13 +1,5 @@
-//
-//  BIImageDownloaderCache.m
-//  BIImageDownloader
-//
-//  Created by Yusuke Sugamiya on 2013/07/19.
-//  Original by ito on 2012/09/03.
-//  Copyright (c) 2013年 Beatrobo Inc. All rights reserved.
-//
-
 #import "BIImageDownloaderCache.h"
+
 
 @implementation BIImageDownloaderCache
 
@@ -39,24 +31,23 @@
     return cache;
 }
 
-#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-- (UIImage*)image
+- (BIImageType*)image
 {
     if (_image) {
         return _image;
     }
-    return [UIImage imageWithData:_data];
-}
-#elif TARGET_OS_MAC
-- (NSImage*)image
-{
-    if (_image) {
-        return _image;
+
+    #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+    {
+        return [UIImage imageWithData:_data];
     }
-#warning あとで NSImage のこと調べる
-    return nil;
+    #elif TARGET_OS_MAC
+    {
+        #warning あとで NSImage のこと調べる
+        return nil;
+    }
+    #endif
 }
-#endif
 
 - (BOOL)isExpiredWith:(NSTimeInterval)time lifeTime:(NSTimeInterval)lifeTime
 {
