@@ -68,7 +68,9 @@
 - (BIImageType*)getImageWithURL:(NSString*)url useOnMemoryCache:(BOOL)useOnMemoryCache lifeTime:(NSUInteger)expireTime completion:(BIImageDownloaderCompleteBlock)completion
 {
     if (!url) {
-        completion(nil);
+        if (completion) {
+            completion(nil);
+        }
         return nil;
     }
     NSString* key = [self keyWithURL:url];
@@ -77,7 +79,9 @@
     BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:YES expiresTime:expireTime];
     if (cache.image) {
         BIImageDownloaderDebugLog(@"%@ is on memory, %d", url, (int)_memoryCache.count);
-        completion(cache.image);
+        if (completion) {
+            completion(cache.image);
+        }
         return cache.image;
     }
 
@@ -89,7 +93,9 @@
                 [_memoryCache setObject:cache forKey:key];
             }
             dispatch_async(dispatch_get_main_queue(), ^{
-                completion(cache.image);
+                if (completion) {
+                    completion(cache.image);
+                }
             });
             return;
         }
@@ -108,7 +114,9 @@
                                       if (!data) {
                                           dispatch_async(dispatch_get_main_queue(), ^{
                                               DPDLog(@"fetch error %@, %@:%@", url, res, error);
-                                              completion(nil);
+                                              if (completion) {
+                                                  completion(nil);
+                                              }
                                           });
                                           return;
                                       }
@@ -124,11 +132,15 @@
                                                   }
                                               }
                                               dispatch_async(dispatch_get_main_queue(), ^{
-                                                  completion(cache.image);
+                                                  if (completion) {
+                                                      completion(cache.image);
+                                                  }
                                               });
                                           } else {
                                               dispatch_async(dispatch_get_main_queue(), ^{
-                                                  completion(nil); // error, invalid data
+                                                  if (completion) {
+                                                      completion(nil); // error, invalid data
+                                                  }
                                               });
                                           }
 
