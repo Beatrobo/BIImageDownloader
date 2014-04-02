@@ -4,11 +4,10 @@
 #include <time.h>
 #import "BIReachability.h"
 #import "NSURLConnection+bi_sendAsynchronousRequestOnMainThread.h"
-#import "DPMacros.h"
 
 
 #ifdef DEBUG
-    #define BIImageDownloaderDebugLog(format, ...)   DPDLog(format, ##__VA_ARGS__)
+    #define BIImageDownloaderDebugLog(format, ...)   {NSLog(@"(%s)@L%d " format, __FUNCTION__, __LINE__, ##__VA_ARGS__);}
 #else
     #define BIImageDownloaderDebugLog(format, ...)   {;}
 #endif
@@ -113,7 +112,7 @@
 
                                       if (!data) {
                                           dispatch_async(dispatch_get_main_queue(), ^{
-                                              DPDLog(@"fetch error %@, %@:%@", url, res, error);
+                                              BIImageDownloaderDebugLog(@"fetch error %@, %@:%@", url, res, error);
                                               if (completion) {
                                                   completion(nil);
                                               }
