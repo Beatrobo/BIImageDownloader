@@ -4,13 +4,7 @@
 #include <time.h>
 #import "BIReachability.h"
 #import "NSURLConnection+bi_sendAsynchronousRequestOnMainThread.h"
-
-
-#ifdef DEBUG
-    #define BIImageDownloaderDebugLog(format, ...)   {NSLog(@"(%s)@L%d " format, __FUNCTION__, __LINE__, ##__VA_ARGS__);}
-#else
-    #define BIImageDownloaderDebugLog(format, ...)   {;}
-#endif
+#import "BIImageDownloaderLog.h"
 
 
 @interface BIImageDownloader ()
@@ -77,7 +71,7 @@
     // find cahce on memory
     BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:YES expiresTime:expireTime];
     if (cache.image) {
-        BIImageDownloaderDebugLog(@"%@ is on memory, %d", url, (int)_memoryCache.count);
+        BIIDLogDebug(@"%@ is on memory, %d", url, (int)_memoryCache.count);
         if (completion) {
             completion(cache.image);
         }
@@ -87,7 +81,7 @@
     dispatch_async(_storageQueue, ^{
         BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:NO expiresTime:expireTime];
         if (cache.image) {
-            BIImageDownloaderDebugLog(@"%@ is on storage", url);
+            BIIDLogDebug(@"%@ is on storage", url);
             @synchronized(_memoryCache) {
                 [_memoryCache setObject:cache forKey:key];
             }
@@ -98,7 +92,7 @@
             });
             return;
         }
-        BIImageDownloaderDebugLog(@"fetching... %@", url);
+        BIIDLogDebug(@"fetching... %@", url);
         NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:30];
 
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -112,7 +106,7 @@
 
                                       if (!data) {
                                           dispatch_async(dispatch_get_main_queue(), ^{
-                                              BIImageDownloaderDebugLog(@"fetch error %@, %@:%@", url, res, error);
+                                              BIIDLogError(@"fetch error %@, %@:%@", url, res, error);
                                               if (completion) {
                                                   completion(nil);
                                               }
