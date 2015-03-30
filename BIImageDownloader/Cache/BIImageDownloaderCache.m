@@ -42,7 +42,7 @@
 
 - (BOOL)isExpiredWith:(NSTimeInterval)time lifeTime:(NSTimeInterval)lifeTime
 {
-    if (abs(time - _createdAt) > lifeTime) {
+    if ((NSTimeInterval)(fabs((double)time - (double)_createdAt)) > lifeTime) {
         return YES;
     }
     return NO;
