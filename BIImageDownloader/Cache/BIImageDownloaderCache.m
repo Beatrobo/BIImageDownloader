@@ -1,6 +1,13 @@
 #import "BIImageDownloaderCache.h"
 
 
+@interface BIImageDownloaderCache ()
+{
+    BIImageType* _image;
+}
+@end
+
+
 @implementation BIImageDownloaderCache
 
 + (instancetype)cacheWithData:(NSData*)data key:(NSString*)key
@@ -20,7 +27,7 @@
     return cache;
 }
 
-+ (instancetype)cacheFromStorageWithKey:(NSString *)key usingFileManager:(NSFileManager*)fm;
++ (instancetype)cacheFromStorageWithKey:(NSString*)key usingFileManager:(NSFileManager*)fm;
 {
     NSData* data = [NSData dataWithContentsOfFile:[[self cacheDirectoryPath] stringByAppendingPathComponent:key]];
     BIImageDownloaderCache* cache = [self cacheWithData:data key:key];
@@ -53,7 +60,7 @@
     [_data writeToFile:[[[self class] cacheDirectoryPath] stringByAppendingPathComponent:_key] atomically:NO];
 }
 
-- (void)deleteUsingFileManager:(NSFileManager *)fm
+- (void)deleteUsingFileManager:(NSFileManager*)fm
 {
     [fm removeItemAtPath:[[[self class] cacheDirectoryPath] stringByAppendingPathComponent:_key] error:nil];
 }

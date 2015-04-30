@@ -2,9 +2,6 @@
 
 
 @interface BIImageDownloaderCache : NSObject
-{
-    BIImageType* _image;
-}
 
 + (instancetype)cacheWithData:(NSData*)data key:(NSString*)key; // returns nil if data is nil
 + (instancetype)cacheFromStorageWithKey:(NSString*)key usingFileManager:(NSFileManager*)fm; // returns nil if no data on storage

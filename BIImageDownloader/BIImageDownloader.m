@@ -26,13 +26,13 @@
     return downloader;
 }
 
-- (id)init
+- (instancetype)init
 {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
 
-- (id)initInstance
+- (instancetype)initInstance
 {
     self = [super init];
     if (self) {
@@ -41,6 +41,7 @@
         _fm = [[NSFileManager alloc] init];
         _storageQueue = dispatch_queue_create("com.beatrobo.library.BIImageDownloader.storage", DISPATCH_QUEUE_SERIAL);
         _memoryCache = [NSMutableDictionary dictionaryWithCapacity:50];
+        _completionQueue = dispatch_get_main_queue();
 
         #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(memoryWarning) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
@@ -49,90 +50,83 @@
     return self;
 }
 
-- (BIImageType*)getImageWithURL:(NSString*)url useOnMemoryCache:(BOOL)useOnMemoryCache lifeTime:(NSUInteger)expireTime completion:(BIImageDownloaderCompleteBlock)completion
+- (void)execCompletion:(BIImageDownloaderCompleteBlock)completion image:(BIImageType*)image
+{
+    if (!completion) {
+        return;
+    }
+    
+    if (_completionQueue == dispatch_get_main_queue() && [[NSThread currentThread] isMainThread]) {
+        completion(image);
+    }
+    else {
+        dispatch_async(_completionQueue, ^{
+            completion(image);
+        });
+    }
+}
+
+- (BIImageType*)getImageWithURL:(NSString*)url useOnMemoryCache:(BOOL)useOnMemoryCache lifeTime:(NSUInteger)lifeTime completion:(BIImageDownloaderCompleteBlock)completion
 {
     if (!url) {
-        if (completion) {
-            completion(nil);
-        }
+        [self execCompletion:completion image:nil];
         return nil;
     }
     
     NSString* key = [self keyWithURL:url];
 
     // find cahce on memory
-    BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:YES expiresTime:expireTime];
+    BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:YES expiresTime:lifeTime];
     if (cache.image) {
-        if (completion) {
-            completion(cache.image);
-        }
+        [self execCompletion:completion image:cache.image];
         return cache.image;
     }
 
     dispatch_async(_storageQueue, ^{
-        BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:NO expiresTime:expireTime];
+        BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:NO expiresTime:lifeTime];
         if (cache.image) {
             @synchronized(_memoryCache) {
                 [_memoryCache setObject:cache forKey:key];
             }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (completion) {
-                    completion(cache.image);
+            [self execCompletion:completion image:cache.image];
+            return;
+        }
+        
+        NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:30];
+        [BIReachability beginNetworkConnection];
+        [_operationQueue addOperationWithBlock:^{
+            NSURLResponse* res   = nil;
+            NSError*       error = nil;
+            NSData*        data  = [NSURLConnection sendSynchronousRequest:req returningResponse:&res error:&error];
+            [BIReachability endNetworkConnection];
+            if (!data || error) {
+                [self execCompletion:completion image:nil];
+                return;
+            }
+            dispatch_async(_storageQueue, ^{
+                BIImageDownloaderCache* cache = [BIImageDownloaderCache cacheWithData:data key:key];
+                if (!cache.image) {
+                    [self execCompletion:completion image:nil];
+                    return;
                 }
+                [cache save];
+                if (useOnMemoryCache) {
+                    @synchronized(_memoryCache) {
+                        [self sweepMemoryCacheIfNeeded];
+                        [_memoryCache setObject:cache forKey:key];
+                    }
+                }
+                [self execCompletion:completion image:cache.image];
             });
-        }
-        else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:30];
-                [BIReachability beginNetworkConnection];
-                [_operationQueue addOperationWithBlock:^{
-                    NSURLResponse* res   = nil;
-                    NSError*       error = nil;
-                    NSData*        data  = [NSURLConnection sendSynchronousRequest:req returningResponse:&res error:&error];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [BIReachability endNetworkConnection];
-                        if (!data) {
-                            if (completion) {
-                                completion(nil);
-                            }
-                        }
-                        else {
-                            dispatch_async(_storageQueue, ^{
-                                BIImageDownloaderCache* cache = [BIImageDownloaderCache cacheWithData:data key:key];
-                                if (!cache.image) {
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                        if (completion) {
-                                            completion(nil); // error, invalid data
-                                        }
-                                    });
-                                }
-                                else {
-                                    [cache save];
-                                    if (useOnMemoryCache) {
-                                        @synchronized(_memoryCache) {
-                                            [self sweepMemoryCacheIfNeeded];
-                                            [_memoryCache setObject:cache forKey:key];
-                                        }
-                                    }
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                        if (completion) {
-                                            completion(cache.image);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }];
-            });
-        }
+        }];
     });
+    
     return nil;
 }
 
 - (NSString*)keyWithURL:(NSString*)url
 {
-    const char *cStr = [url UTF8String];
+    const char * cStr = [url UTF8String];
     unsigned char result[16];
     CC_MD5( cStr, (CC_LONG)strlen(cStr), result );
     return [NSString stringWithFormat:
@@ -144,9 +138,9 @@
             ];
 }
 
-- (BIImageDownloaderCache*)cacheForKey:(NSString*)key onMemory:(BOOL)onmemory expiresTime:(NSUInteger)time
+- (BIImageDownloaderCache*)cacheForKey:(NSString*)key onMemory:(BOOL)onMemory expiresTime:(NSUInteger)expiresTime
 {
-    if (onmemory) {
+    if (onMemory) {
         BIImageDownloaderCache* cache;
         @synchronized(_memoryCache) {
             cache = [_memoryCache objectForKey:key];
@@ -156,7 +150,7 @@
     else {
         BIImageDownloaderCache* cache = [BIImageDownloaderCache cacheFromStorageWithKey:key usingFileManager:_fm];
         if (cache) {
-            if ([cache isExpiredWith:[[NSDate date] timeIntervalSince1970] lifeTime:time]) {
+            if ([cache isExpiredWith:[[NSDate date] timeIntervalSince1970] lifeTime:expiresTime]) {
                 @synchronized(_memoryCache) {
                     [_memoryCache removeObjectForKey:key];
                 }
