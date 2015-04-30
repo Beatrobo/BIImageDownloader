@@ -1,13 +1,13 @@
 Pod::Spec.new do |s|
   s.name                  = 'BIImageDownloader'
-  s.version               = '1.2.4'
+  s.version               = '1.3'
   s.summary               = '永続化機能とキャッシュ機能付き、軽量画像ダウンローダー'
   s.authors               = {
     'Yusuke SUGAMIYA' => 'yusuke.dnpp@gmail.com',
     'Yusuke Ito'      => 'novi.mad@gmail.com'
   }
   s.homepage              = 'https://github.com/Beatrobo/BIImageDownloader'
-  s.source                = { :git => 'git@github.com:Beatrobo/BIImageDownloader.git', :tag => "#{s.version}" }
+  s.source                = { :git => 'https://github.com/Beatrobo/BIImageDownloader.git', :tag => "#{s.version}" }
   source_files            = 'BIImageDownloader/**/*.{h,m}'
   s.source_files          = source_files
   s.ios.source_files      = source_files
