@@ -3,7 +3,6 @@
 #import  <CommonCrypto/CommonDigest.h>
 #include <time.h>
 #import  "BIReachability.h"
-#import  "BIImageDownloaderLog.h"
 
 
 @interface BIImageDownloader ()
@@ -64,7 +63,6 @@
     // find cahce on memory
     BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:YES expiresTime:expireTime];
     if (cache.image) {
-        BIIDLogDebug(@"%@ is on memory, %d", url, (int)_memoryCache.count);
         if (completion) {
             completion(cache.image);
         }
@@ -74,7 +72,6 @@
     dispatch_async(_storageQueue, ^{
         BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:NO expiresTime:expireTime];
         if (cache.image) {
-            BIIDLogDebug(@"%@ is on storage", url);
             @synchronized(_memoryCache) {
                 [_memoryCache setObject:cache forKey:key];
             }
@@ -86,7 +83,6 @@
         }
         else {
             dispatch_async(dispatch_get_main_queue(), ^{
-                BIIDLogDebug(@"fetching... %@", url);
                 NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:30];
                 [BIReachability beginNetworkConnection];
                 [_operationQueue addOperationWithBlock:^{
@@ -96,7 +92,6 @@
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [BIReachability endNetworkConnection];
                         if (!data) {
-                            BIIDLogError(@"fetch error %@, %@:%@", url, res, error);
                             if (completion) {
                                 completion(nil);
                             }

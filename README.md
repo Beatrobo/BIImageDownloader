@@ -2,7 +2,6 @@ BIImageDownloader
 =================
 
 ### Dependency
-* `BILogManager`
 * `BIReachability`
 
 ### Require Framework

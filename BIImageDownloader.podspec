@@ -15,7 +15,6 @@ Pod::Spec.new do |s|
   s.osx.deployment_target = '10.8'
   s.requires_arc          = true
 
-  s.dependency 'BILogManager'
   s.dependency 'BIReachability'
 
   s.license = {
