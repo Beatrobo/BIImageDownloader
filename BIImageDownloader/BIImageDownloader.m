@@ -7,6 +7,7 @@
 
 @interface BIImageDownloader ()
 {
+    NSOperationQueue*    _operationQueue;
     dispatch_queue_t     _storageQueue;
     NSFileManager*       _fm;
     NSMutableDictionary* _memoryCache;

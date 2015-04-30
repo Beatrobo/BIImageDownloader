@@ -23,6 +23,6 @@ pod repo push --allow-warnings beatrobo *.podspec
 
 BI is "Beatrobo Inc" prefix.
 
-機能は名前の通り、汎用画像ダウンローダ。
+永続化機能とキャッシュ機能付き、軽量画像ダウンローダー。
 
 Beatrobo で使ってたものを抽象化して抽出したやつ。

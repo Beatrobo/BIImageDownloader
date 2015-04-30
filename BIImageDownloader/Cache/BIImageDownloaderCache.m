@@ -5,6 +5,11 @@
 {
     BIImageType* _image;
 }
+
+@property (nonatomic, copy)     NSString*      key;
+@property (nonatomic)           NSTimeInterval createdAt;
+@property (nonatomic, copy)     NSData*        data;
+
 @end
 
 
