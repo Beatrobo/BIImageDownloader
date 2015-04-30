@@ -48,8 +48,9 @@
     if (_image) {
         return _image;
     }
-
-    return [[BIImageType alloc] initWithData:_data];
+    else {
+        return [[BIImageType alloc] initWithData:_data];
+    }
 }
 
 - (BOOL)isExpiredWith:(NSTimeInterval)time lifeTime:(NSTimeInterval)lifeTime
@@ -57,12 +58,26 @@
     if ((NSTimeInterval)(fabs((double)time - (double)_createdAt)) > lifeTime) {
         return YES;
     }
-    return NO;
+    else {
+        return NO;
+    }
 }
 
 - (void)save
 {
-    [_data writeToFile:[[[self class] cacheDirectoryPath] stringByAppendingPathComponent:_key] atomically:NO];
+    NSString* path = [[self class] cacheDirectoryPath];
+    NSFileManager* fm = [NSFileManager defaultManager];
+    BOOL isDirectory = NO;
+    if ([fm fileExistsAtPath:path isDirectory:&isDirectory]) {
+        if (!isDirectory) {
+            [fm removeItemAtPath:path error:nil];
+            [fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+        }
+    } else {
+        [fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    
+    [_data writeToFile:[path stringByAppendingPathComponent:_key] atomically:NO];
 }
 
 - (void)deleteUsingFileManager:(NSFileManager*)fm
@@ -72,8 +87,8 @@
 
 + (NSString*)cacheDirectoryPath
 {
-    NSArray* cachePaths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    NSString* cacheDirectory = [cachePaths objectAtIndex:0];
+    NSArray*  cachePaths     = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString* cacheDirectory = [cachePaths[0] stringByAppendingPathComponent:@"com.beatrobo.library.BIImageDownloader"];
     return cacheDirectory;
 }
 
