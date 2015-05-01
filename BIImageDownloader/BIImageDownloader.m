@@ -17,6 +17,8 @@
 
 @implementation BIImageDownloader
 
+#pragma mark - Singleton Pattern
+
 + (instancetype)sharedInstance
 {
     static id downloader;
@@ -42,8 +44,7 @@
         _fm = [[NSFileManager alloc] init];
         _storageQueue = dispatch_queue_create("com.beatrobo.library.BIImageDownloader.storage", DISPATCH_QUEUE_SERIAL);
         _memoryCache = [NSMutableDictionary dictionaryWithCapacity:50];
-        _completionQueue = dispatch_get_main_queue();
-
+        
         #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(memoryWarning) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
         #endif
@@ -51,26 +52,25 @@
     return self;
 }
 
-- (void)execCompletion:(BIImageDownloaderCompleteBlock)completion image:(BIImageType*)image
+#pragma mark - Main Methods
+
+- (BIImageType*)getImageWithURL:(NSString*)url
+               useOnMemoryCache:(BOOL)useOnMemoryCache
+                       lifeTime:(NSUInteger)lifeTime
+                     completion:(BIImageDownloaderCompleteBlock)completion
 {
-    if (!completion) {
-        return;
-    }
-    
-    if (_completionQueue == dispatch_get_main_queue() && [[NSThread currentThread] isMainThread]) {
-        completion(image);
-    }
-    else {
-        dispatch_async(_completionQueue, ^{
-            completion(image);
-        });
-    }
+    return [self getImageWithURL:url useOnMemoryCache:useOnMemoryCache lifeTime:lifeTime feedbackNetworkActivityIndicator:YES completionQueue:dispatch_get_main_queue() completion:completion];
 }
 
-- (BIImageType*)getImageWithURL:(NSString*)url useOnMemoryCache:(BOOL)useOnMemoryCache lifeTime:(NSUInteger)lifeTime completion:(BIImageDownloaderCompleteBlock)completion
+-  (BIImageType*)getImageWithURL:(NSString*)url
+                useOnMemoryCache:(BOOL)useOnMemoryCache
+                        lifeTime:(NSUInteger)lifeTime
+feedbackNetworkActivityIndicator:(BOOL)feedbackNetworkActivityIndicator
+                 completionQueue:(dispatch_queue_t)queue
+                      completion:(BIImageDownloaderCompleteBlock)completion
 {
     if (!url) {
-        [self execCompletion:completion image:nil];
+        [self execCompletion:completion queue:queue image:nil];
         return nil;
     }
     
@@ -79,7 +79,7 @@
     // find cahce on memory
     BIImageDownloaderCache* cache = [self cacheForKey:key onMemory:YES expiresTime:lifeTime];
     if (cache.image) {
-        [self execCompletion:completion image:cache.image];
+        [self execCompletion:completion queue:queue image:cache.image];
         return cache.image;
     }
 
@@ -89,25 +89,29 @@
             @synchronized(_memoryCache) {
                 [_memoryCache setObject:cache forKey:key];
             }
-            [self execCompletion:completion image:cache.image];
+            [self execCompletion:completion queue:queue image:cache.image];
             return;
         }
         
         NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:30];
-        [BIReachability beginNetworkConnection];
+        if (feedbackNetworkActivityIndicator) {
+            [BIReachability beginNetworkConnection];
+        }
         [_operationQueue addOperationWithBlock:^{
             NSURLResponse* res   = nil;
             NSError*       error = nil;
             NSData*        data  = [NSURLConnection sendSynchronousRequest:req returningResponse:&res error:&error];
-            [BIReachability endNetworkConnection];
+            if (feedbackNetworkActivityIndicator) {
+                [BIReachability endNetworkConnection];
+            }
             if (!data || error) {
-                [self execCompletion:completion image:nil];
+                [self execCompletion:completion queue:queue image:nil];
                 return;
             }
             dispatch_async(_storageQueue, ^{
                 BIImageDownloaderCache* cache = [BIImageDownloaderCache cacheWithData:data key:key];
                 if (!cache.image) {
-                    [self execCompletion:completion image:nil];
+                    [self execCompletion:completion queue:queue image:nil];
                     return;
                 }
                 [cache save];
@@ -117,12 +121,30 @@
                         [_memoryCache setObject:cache forKey:key];
                     }
                 }
-                [self execCompletion:completion image:cache.image];
+                [self execCompletion:completion queue:queue image:cache.image];
             });
         }];
     });
     
     return nil;
+}
+
+#pragma mark - Private Methods
+
+- (void)execCompletion:(BIImageDownloaderCompleteBlock)completion queue:(dispatch_queue_t)queue image:(BIImageType*)image
+{
+    if (!completion || !queue) {
+        return;
+    }
+    
+    if (queue == dispatch_get_main_queue() && [[NSThread currentThread] isMainThread]) {
+        completion(image);
+    }
+    else {
+        dispatch_async(queue, ^{
+            completion(image);
+        });
+    }
 }
 
 - (NSString*)keyWithURL:(NSString*)url

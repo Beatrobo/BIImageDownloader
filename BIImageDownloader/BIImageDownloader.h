@@ -8,7 +8,16 @@ typedef void(^BIImageDownloaderCompleteBlock)(BIImageType* image); // nil is fai
 
 + (instancetype)sharedInstance;
 
-@property (nonatomic) dispatch_queue_t completionQueue; // default is main queue
-- (BIImageType*)getImageWithURL:(NSString*)url useOnMemoryCache:(BOOL)useOnMemoryCache lifeTime:(NSUInteger)lifeTime completion:(BIImageDownloaderCompleteBlock)completion;
+- (BIImageType*)getImageWithURL:(NSString*)url
+               useOnMemoryCache:(BOOL)useOnMemoryCache
+                       lifeTime:(NSUInteger)lifeTime
+                     completion:(BIImageDownloaderCompleteBlock)completion;
+
+-  (BIImageType*)getImageWithURL:(NSString*)url
+                useOnMemoryCache:(BOOL)useOnMemoryCache
+                        lifeTime:(NSUInteger)lifeTime
+feedbackNetworkActivityIndicator:(BOOL)feedbackNetworkActivityIndicator
+                 completionQueue:(dispatch_queue_t)queue
+                      completion:(BIImageDownloaderCompleteBlock)completion;
 
 @end
