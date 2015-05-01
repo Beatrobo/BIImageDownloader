@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name                  = 'BIImageDownloader'
   s.version               = '1.3'
-  s.summary               = '永続化機能とキャッシュ機能付き、軽量画像ダウンローダー'
+  s.summary               = 'Lightweight Image Downloader. including disk cache function, memory cache function.'
   s.authors               = {
     'Yusuke SUGAMIYA' => 'yusuke.dnpp@gmail.com',
     'Yusuke Ito'      => 'novi.mad@gmail.com'
