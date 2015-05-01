@@ -1,7 +1,7 @@
 BIImageDownloader
 =================
 
-[![Build Status](http://img.shields.io/travis/Beatrobo/BIImageDownloader/development.svg?style=flat-square)](https://travis-ci.org/Beatrobo/BIImageDownloader)
+[![Build Status](http://img.shields.io/travis/Beatrobo/BIImageDownloader.svg?style=flat-square)](https://travis-ci.org/Beatrobo/BIImageDownloader)
 [![Pod Version](http://img.shields.io/cocoapods/v/BIImageDownloader.svg?style=flat-square)](http://cocoadocs.org/docsets/BIImageDownloader/)
 [![Pod Platform](http://img.shields.io/cocoapods/p/BIImageDownloader.svg?style=flat-square)](http://cocoadocs.org/docsets/BIImageDownloader/)
 [![Pod License](http://img.shields.io/cocoapods/l/BIImageDownloader.svg?style=flat-square)](http://opensource.org/licenses/MIT)
