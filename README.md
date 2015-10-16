@@ -6,19 +6,11 @@ BIImageDownloader
 [![Pod Platform](http://img.shields.io/cocoapods/p/BIImageDownloader.svg?style=flat-square)](http://cocoadocs.org/docsets/BIImageDownloader/)
 [![Pod License](http://img.shields.io/cocoapods/l/BIImageDownloader.svg?style=flat-square)](http://opensource.org/licenses/MIT)
 
-### Dependency
-* `BIReachability`
-
-### Require Framework
-* None
-
 # Description
 
-BI is "Beatrobo Inc" prefix.
+This repository has been move to [`DPImageDownloader`](https://github.com/dnpp73/DPImageDownloader)
 
-Lightweight Image Downloader. including disk cache function, memory cache function.
-
-#LICENSE
+# LICENSE
 
 Copyright (c) 2015 Beatrobo, Inc
 

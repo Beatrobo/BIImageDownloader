@@ -1,12 +1,12 @@
 Pod::Spec.new do |s|
   s.name                  = 'BIImageDownloader'
-  s.version               = '1.3.1'
-  s.summary               = 'Lightweight Image Downloader. including disk cache function, memory cache function.'
+  s.version               = '2.0.0'
+  s.summary               = 'Lightweight Image Downloader. including (disk|memory) cache function.'
   s.authors               = {
     'Yusuke SUGAMIYA' => 'yusuke.dnpp@gmail.com',
     'Yusuke Ito'      => 'novi.mad@gmail.com'
   }
-  s.homepage              = 'https://github.com/Beatrobo/BIImageDownloader'
+  s.homepage              = 'https://github.com/dnpp73/DPImageDownloader'
   s.source                = { :git => 'https://github.com/Beatrobo/BIImageDownloader.git', :tag => "#{s.version}" }
   source_files            = 'BIImageDownloader/**/*.{h,m}'
   s.source_files          = source_files
@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.osx.deployment_target = '10.8'
   s.requires_arc          = true
 
-  s.dependency 'BIReachability'
+  s.dependency 'DPImageDownloader'
 
   s.license = {
    :type => 'MIT',
